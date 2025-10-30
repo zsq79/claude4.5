@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Dashboard - Kiro2API</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 KIRO Token Dashboard</h1>
+            <p>实时监控Token池状态和使用情况</p>
+        </div>
+
+        <div class="main-tabs">
+            <button class="main-tab-btn active" data-tab="tokens">📊 Token管理</button>
+            <button class="main-tab-btn" data-tab="settings">⚙️ 系统设置</button>
+        </div>
+
+        <!-- Token管理标签页 -->
+        <div class="main-tab-content active" id="tokens-tab">
+        <div class="controls">
+            <button class="refresh-btn">
+                🔄 手动刷新
+            </button>
+            <button class="reload-config-btn">
+                ➕ 添加Token
+            </button>
+            <div class="auto-refresh">
+                <span>自动刷新</span>
+                <div class="switch"></div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">总Token数</span>
+                <span class="status-value" id="totalTokens">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">可用Token</span>
+                <span class="status-value" id="activeTokens">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">最后更新</span>
+                <span class="status-value" id="lastUpdate">-</span>
+            </div>
+        </div>
+        
+        <div class="main-card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>用户邮箱</th>
+                            <th>Token预览</th>
+                            <th>认证方式</th>
+                            <th>剩余次数</th>
+                            <th>过期时间</th>
+                            <th>最后使用</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tokenTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">
+                                <div class="spinner"></div>
+                                正在加载Token数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+        <!-- Token管理标签页结束 -->
+
+        <!-- 系统设置标签页 -->
+        <div class="main-tab-content" id="settings-tab">
+            <div class="settings-container">
+                <div class="settings-section">
+                    <h3>🔐 认证设置</h3>
+                    <div class="setting-item">
+                        <label>客户端认证Token</label>
+                        <input type="password" id="clientToken" placeholder="用于API访问的Bearer Token">
+                        <small>用于 API 访问认证（修改后需要使用新token访问）</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🎭 隐身模式设置（Kiro IDE 请求头）</h3>
+                    <div class="setting-item">
+                        <label>启用隐身模式</label>
+                        <select id="stealthMode">
+                            <option value="true">启用（推荐）</option>
+                            <option value="false">禁用</option>
+                        </select>
+                        <small>使用真实 Kiro IDE v0.4.0 请求头格式</small>
+                    </div>
+                    <div class="setting-item">
+                        <label>请求头策略</label>
+                        <select id="headerStrategy">
+                            <option value="real_simulation">真实Kiro IDE格式（推荐）</option>
+                            <option value="random">随机生成（旧版）</option>
+                        </select>
+                        <small>真实格式：85%使用v0.4.0，15%使用v0.3.x</small>
+                    </div>
+                    <div class="setting-item">
+                        <label>HTTP/2 模式</label>
+                        <select id="http2Mode">
+                            <option value="auto">自动（推荐）</option>
+                            <option value="force">强制启用</option>
+                            <option value="disable">禁用</option>
+                        </select>
+                        <small>自动模式会随机选择 HTTP/2 或 HTTP/1.1</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🚀 服务配置</h3>
+                    <div class="setting-item">
+                        <label>服务端口</label>
+                        <input type="number" id="port" placeholder="8080" min="1" max="65535">
+                        <small>修改后需要重启服务生效</small>
+                    </div>
+                    <div class="setting-item">
+                        <label>运行模式</label>
+                        <select id="ginMode">
+                            <option value="release">生产模式</option>
+                            <option value="debug">调试模式</option>
+                            <option value="test">测试模式</option>
+                        </select>
+                        <small>调试模式会输出更多日志</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📝 日志配置</h3>
+                    <div class="setting-item">
+                        <label>日志级别</label>
+                        <select id="logLevel">
+                            <option value="debug">调试</option>
+                            <option value="info">信息</option>
+                            <option value="warn">警告</option>
+                            <option value="error">错误</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>日志格式</label>
+                        <select id="logFormat">
+                            <option value="json">JSON格式</option>
+                            <option value="text">文本格式</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>控制台输出</label>
+                        <select id="logConsole">
+                            <option value="true">启用</option>
+                            <option value="false">禁用</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🔧 工具配置</h3>
+                    <div class="setting-item">
+                        <label>工具描述最大长度</label>
+                        <input type="number" id="maxToolLength" placeholder="10000" min="1000" max="100000">
+                        <small>限制tool description字段长度，防止超长内容</small>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="save-settings-btn">💾 保存配置</button>
+                    <button class="reset-settings-btn">🔄 重置为默认值</button>
+                </div>
+
+                <div id="settingsStatus" class="settings-status"></div>
+            </div>
+        </div>
+        <!-- 系统设置标签页结束 -->
+    </div>
+
+    <!-- Token配置更新模态框 -->
+    <div id="reloadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ 添加Token配置</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="json">JSON输入</button>
+                    <button class="tab-btn" data-tab="file">文件上传</button>
+                </div>
+                
+                <div class="tab-content active" id="json-tab">
+                    <p class="hint">粘贴要添加的token配置JSON（数组格式，会添加到现有token中）</p>
+                    <textarea id="configJson" placeholder='[
+  {
+    "auth": "Social",
+    "refreshToken": "your-token-here"
+  },
+  {
+    "auth": "IdC",
+    "refreshToken": "your-token",
+    "clientId": "your-client-id",
+    "clientSecret": "your-client-secret"
+  }
+]'></textarea>
+                    <button class="submit-btn" id="submitJson">添加Token</button>
+                </div>
+                
+                <div class="tab-content" id="file-tab">
+                    <p class="hint">支持三种方式：</p>
+                    <ul class="hint-list">
+                        <li>📄 标准配置文件（JSON数组格式）</li>
+                        <li>📁 Kiro token 文件夹（支持多文件拖拽，自动识别并合并）</li>
+                        <li>🔗 自动匹配 kiro-auth-token.json + client 配置文件</li>
+                    </ul>
+                    <div class="file-upload">
+                        <input type="file" id="configFile" accept=".json" multiple>
+                        <label for="configFile" class="file-label">
+                            <span class="file-icon">📁</span>
+                            <span class="file-text">点击选择文件或拖拽多个文件到此处</span>
+                        </label>
+                        <div id="fileName" class="file-name"></div>
+                    </div>
+                    <button class="submit-btn" id="submitFile">智能解析并添加</button>
+                </div>
+                
+                <div id="reloadStatus" class="reload-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

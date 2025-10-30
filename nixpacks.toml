@@ -1,0 +1,13 @@
+providers = ['...', 'go']
+
+[phases.setup]
+nixPkgs = ['...', 'go', 'gcc', 'pkg-config']
+
+[phases.install]
+cmds = ['go mod download']
+
+[phases.build]
+cmds = ['CGO_ENABLED=1 go build -o kiro2api ./cmd/kiro2api']
+
+[start]
+cmd = './kiro2api'
